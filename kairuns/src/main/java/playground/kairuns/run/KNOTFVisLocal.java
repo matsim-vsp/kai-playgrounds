@@ -8,9 +8,9 @@ import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
-import org.matsim.core.config.groups.PlansCalcRouteConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
+import org.matsim.core.config.groups.RoutingConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.ControlerUtils;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
@@ -63,7 +63,7 @@ class KNOTFVisLocal{
 			}
 		}
 
-		config.controler().setOverwriteFileSetting( OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists );
+		config.controller().setOverwriteFileSetting( OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists );
 
 		config.qsim().setSnapshotStyle( QSimConfigGroup.SnapshotStyle.kinematicWaves );
 
@@ -76,12 +76,12 @@ class KNOTFVisLocal{
 		visConfig.setDrawTransitFacilities( false );
 		visConfig.setDrawTransitFacilityIds( false );
 
-		for( PlansCalcRouteConfigGroup.ModeRoutingParams params : config.plansCalcRoute().getModeRoutingParams().values() ){
+		for( RoutingConfigGroup.TeleportedModeParams params : config.routing().getModeRoutingParams().values() ){
 			if ( params.getTeleportedModeSpeed()==null && params.getTeleportedModeFreespeedFactor()==null ) {
 				params.setTeleportedModeSpeed( 2.0 );
 			}
 		}
-		for( PlanCalcScoreConfigGroup.ActivityParams params : config.planCalcScore().getActivityParams() ){
+		for( ScoringConfigGroup.ActivityParams params : config.scoring().getActivityParams() ){
 			if ( params.getTypicalDuration().isUndefined() ) {
 				params.setTypicalDuration( 3600. ) ;
 			}
@@ -92,7 +92,7 @@ class KNOTFVisLocal{
 
 		// ---
 
-		ControlerUtils.checkConfigConsistencyAndWriteToLog( config, "before loading scenario" );
+//		ControlerUtils.checkConfigConsistencyAndWriteToLog( config, "before loading scenario" );
 
 		Scenario scenario = ScenarioUtils.loadScenario( config );
 

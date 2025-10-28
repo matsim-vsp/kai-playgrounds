@@ -36,13 +36,11 @@ import org.matsim.contrib.noise.MergeNoiseCSVFile.OutputFormat;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.noise.NoiseOfflineCalculation;
 import org.matsim.core.config.Config;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
-import org.matsim.core.config.groups.PlansCalcRouteConfigGroup.AccessEgressType;
-import org.matsim.core.config.groups.PlansCalcRouteConfigGroup.ModeRoutingParams;
 import org.matsim.core.config.groups.QSimConfigGroup.LinkDynamics;
 import org.matsim.core.config.groups.QSimConfigGroup.VehiclesSource;
-import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
+import org.matsim.core.config.groups.ReplanningConfigGroup;
+import org.matsim.core.config.groups.RoutingConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultSelector;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
@@ -51,6 +49,10 @@ import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
+
+import static org.matsim.core.config.groups.ReplanningConfigGroup.*;
+import static org.matsim.core.config.groups.RoutingConfigGroup.*;
+import static org.matsim.core.config.groups.ScoringConfigGroup.*;
 
 /**
  * @author nagel
@@ -163,14 +165,14 @@ final class BerlinUtils {
 		{
 			ActivityParams params = new ActivityParams("home") ;
 			params.setTypicalDuration(12*3600);
-			config.planCalcScore().addActivityParams(params);
+			config.scoring().addActivityParams(params);
 		}
 		{
 			ActivityParams params = new ActivityParams("not specified") ;
 			params.setTypicalDuration(0.5*3600);
 			params.setOpeningTime(6*3600);
 			params.setClosingTime(22*3600);
-			config.planCalcScore().addActivityParams(params);
+			config.scoring().addActivityParams(params);
 			// yyyy should probably be same as "home" in many situations: first activity of day
 		}
 		{
@@ -178,66 +180,66 @@ final class BerlinUtils {
 			params.setTypicalDuration(2*3600);
 			params.setOpeningTime(10*3600);
 			params.setClosingTime(22*3600);
-			config.planCalcScore().addActivityParams(params);
+			config.scoring().addActivityParams(params);
 		}
 		{
 			ActivityParams params = new ActivityParams("shopping") ;
 			params.setTypicalDuration(1*3600);
 			params.setOpeningTime(8*3600);
 			params.setClosingTime(20*3600);
-			config.planCalcScore().addActivityParams(params);
+			config.scoring().addActivityParams(params);
 		}
 		{
 			ActivityParams params = new ActivityParams("work") ;
 			params.setTypicalDuration(9*3600);
 			params.setOpeningTime(6*3600);
 			params.setClosingTime(19*3600);
-			config.planCalcScore().addActivityParams(params);
+			config.scoring().addActivityParams(params);
 		}
 		{
 			ActivityParams params = new ActivityParams("education") ;
 			params.setTypicalDuration(8*3600);
 			params.setOpeningTime(8*3600);
 			params.setClosingTime(18*3600);
-			config.planCalcScore().addActivityParams(params);
+			config.scoring().addActivityParams(params);
 		}
 		{
 			ActivityParams params = new ActivityParams("business") ;
 			params.setTypicalDuration(1*3600);
 			params.setOpeningTime(9*3600);
 			params.setClosingTime(20*3600);
-			config.planCalcScore().addActivityParams(params);
+			config.scoring().addActivityParams(params);
 		}
 		{
 			ActivityParams params = new ActivityParams("multiple") ;
 			params.setTypicalDuration(0.5*3600);
 			params.setOpeningTime(6*3600);
 			params.setClosingTime(22*3600);
-			config.planCalcScore().addActivityParams(params);
+			config.scoring().addActivityParams(params);
 		}
 		{
 			ActivityParams params = new ActivityParams("other") ;
 			params.setTypicalDuration(0.5*3600);
 			params.setOpeningTime(6*3600);
 			params.setClosingTime(22*3600);
-			config.planCalcScore().addActivityParams(params);
+			config.scoring().addActivityParams(params);
 		}
 		{
 			ActivityParams params = new ActivityParams("see a doctor") ;
 			params.setTypicalDuration(1*3600);
 			params.setOpeningTime(6*3600);
 			params.setClosingTime(20*3600);
-			config.planCalcScore().addActivityParams(params);
+			config.scoring().addActivityParams(params);
 		}
 		{
 			ActivityParams params = new ActivityParams("holiday / journey") ;
 			params.setTypicalDuration(20*3600);
-			config.planCalcScore().addActivityParams(params);
+			config.scoring().addActivityParams(params);
 		}
 		{
 			ActivityParams params = new ActivityParams("dummy") ; // Personenwirtschaftsverkehr von Sebastian Schneider
 			params.setTypicalDuration(1*3600);
-			config.planCalcScore().addActivityParams(params);
+			config.scoring().addActivityParams(params);
 		}
 	}
 
@@ -281,22 +283,22 @@ final class BerlinUtils {
 			StrategySettings stratSets = new StrategySettings( ) ;
 			stratSets.setStrategyName( DefaultSelector.ChangeExpBeta.toString() ) ;
 			stratSets.setWeight(0.9);
-			config.strategy().addStrategySettings(stratSets);
+			config.replanning().addStrategySettings(stratSets);
 		}
 		{
 			StrategySettings stratSets = new StrategySettings( ) ;
 			stratSets.setStrategyName( DefaultStrategy.ReRoute ) ;
 			stratSets.setWeight(0.1);
-			config.strategy().addStrategySettings(stratSets);
+			config.replanning().addStrategySettings(stratSets);
 			if ( !equil ) {
-				config.plansCalcRoute().setAccessEgressType(AccessEgressType.accessEgressModeToLink);
+				config.routing().setAccessEgressType(AccessEgressType.accessEgressModeToLink);
 			}
 		}
 		if ( modeChoice ) {
 			StrategySettings stratSets = new StrategySettings( ) ;
 			stratSets.setStrategyName( DefaultStrategy.ChangeSingleTripMode );
 			stratSets.setWeight(0.1);
-			config.strategy().addStrategySettings(stratSets);
+			config.replanning().addStrategySettings(stratSets);
 			if ( equil ) {
 				config.changeMode().setModes(new String[] {"car","pt"});
 			} else {
@@ -308,7 +310,7 @@ final class BerlinUtils {
 //				StrategySettings stratSets = new StrategySettings( ) ;
 //				stratSets.setStrategyName( DefaultStrategy.TimeAllocationMutator.name() );
 //				stratSets.setWeight(0.1);
-//				config.strategy().addStrategySettings(stratSets);
+//				config.replanning().addStrategySettings(stratSets);
 //			}
 			config.timeAllocationMutator().setMutationRange(7200.);    // pacify consistency checker
 			config.timeAllocationMutator().setAffectingDuration(false); // dto.
@@ -334,14 +336,14 @@ final class BerlinUtils {
 	
 		// ---
 	
-		String outputDirectory = config.controler().getOutputDirectory()+"/noise/" ;
+		String outputDirectory = config.controller().getOutputDirectory()+"/noise/" ;
 	
 		NoiseOfflineCalculation noiseCalculation = new NoiseOfflineCalculation(scenario, outputDirectory);
 		noiseCalculation.run();		
 	
 		// ---
 	
-		String outputFilePath = outputDirectory + "analysis_it." + config.controler().getLastIteration() + "/";
+		String outputFilePath = outputDirectory + "analysis_it." + config.controller().getLastIteration() + "/";
 		mergeNoiseFiles(outputFilePath);
 	}
 
@@ -351,7 +353,7 @@ final class BerlinUtils {
 
 		// network modes for router:
 		Collection<String> networkModes = new ArrayList<>() ;
-		config.plansCalcRoute().setNetworkModes(networkModes);
+		config.routing().setNetworkModes(networkModes);
 		
 		// network modes for qsim:
 		Collection<String> mainModes = Arrays.asList( new String[] { TransportMode.car } ) ;
@@ -364,13 +366,13 @@ final class BerlinUtils {
 			ModeRoutingParams pars = new ModeRoutingParams(mode) ;
 			pars.setTeleportedModeFreespeedFactor(1.); 
 			pars.setTeleportedModeFreespeedLimit(5./3.6);
-			config.plansCalcRoute().addModeRoutingParams(pars);
+			config.routing().addModeRoutingParams(pars);
 
 			// scoring:
 			ModeParams params = new ModeParams( mode ) ;
 			params.setConstant(0);
 			params.setMarginalUtilityOfTraveling(-1.); // this should be by distance, but with const spd does not matter
-			config.planCalcScore().addModeParams(params);
+			config.scoring().addModeParams(params);
 		}
 		{
 			String mode = TransportMode.bike ;
@@ -378,20 +380,20 @@ final class BerlinUtils {
 			ModeRoutingParams pars = new ModeRoutingParams(mode) ;
 			pars.setTeleportedModeFreespeedFactor(1.); 
 			pars.setTeleportedModeFreespeedLimit(14.5/3.6);
-			config.plansCalcRoute().addModeRoutingParams(pars);
+			config.routing().addModeRoutingParams(pars);
 
 			// scoring:
 			ModeParams params = new ModeParams( mode ) ;
 			params.setConstant(-1.); // maybe some initiation costs compared to walk
 			params.setMarginalUtilityOfTraveling(-4.);
-			config.planCalcScore().addModeParams(params);
+			config.scoring().addModeParams(params);
 		}
 		{
 			String mode = TransportMode.pt ;
 			
 			ModeRoutingParams pars = new ModeRoutingParams(mode) ;
 			pars.setTeleportedModeFreespeedFactor(2.1); 
-			config.plansCalcRoute().addModeRoutingParams(pars);
+			config.routing().addModeRoutingParams(pars);
 
 //			networkModes.add(mode) ;
 
@@ -399,7 +401,7 @@ final class BerlinUtils {
 			ModeParams params = new ModeParams(mode) ;
 			params.setConstant(-3.); // (parameterizes access/egress walk)
 			params.setMarginalUtilityOfTraveling(0.);
-			config.planCalcScore().addModeParams(params);
+			config.scoring().addModeParams(params);
 		}
 		{
 			String mode = TransportMode.car ;
@@ -411,7 +413,7 @@ final class BerlinUtils {
 			params.setConstant(-0.); // worse than bike but better than pt.  But may include some fixed cost ...
 			params.setMarginalUtilityOfTraveling(0.);
 			params.setMonetaryDistanceRate(-0.10/1000.); // recall that this is Eu/m (!)
-			config.planCalcScore().addModeParams(params);
+			config.scoring().addModeParams(params);
 		}
 		{
 			String mode = "undefined" ;
@@ -419,12 +421,12 @@ final class BerlinUtils {
 			ModeRoutingParams pars = new ModeRoutingParams(mode) ;
 			pars.setBeelineDistanceFactor(1.3);
 			pars.setTeleportedModeSpeed( 50./3.6 );
-			config.plansCalcRoute().addModeRoutingParams(pars);
+			config.routing().addModeRoutingParams(pars);
 	
 			ModeParams params = new ModeParams(mode) ;
 			params.setConstant(-6.);
 			params.setMarginalUtilityOfTraveling(0.); // yyyy should make this very unattractive so it dies out
-			config.planCalcScore().addModeParams(params);
+			config.scoring().addModeParams(params);
 		}
 		
 		// yyyy missing is "in car as passenger"

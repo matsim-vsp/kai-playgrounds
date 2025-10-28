@@ -32,11 +32,10 @@ import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.core.config.Config;
-import org.matsim.core.config.ConfigReader;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 import org.matsim.core.config.groups.PlansConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -56,9 +55,9 @@ class KNTransitControler {
 		Config config;
 		if ( args == null || args.length==0 || args[0]==null ){
 			config = ConfigUtils.loadConfig(
-//					"/Users/kainagel/runs-svn/berlin-bvg09/presentation_20100408/bb_10p/1pct-config-local.xml"
+					"/Users/kainagel/runs-svn/berlin-bvg09/presentation_20100408/bb_10p/1pct-config-local.xml"
 //				"/Users/kainagel/runs-svn/berlin-bvg09/presentation_20100408/bb_10p/config-kai-local.xml"
-				"/Users/kainagel/runs-svn/berlin-bvg09/presentation_20100408/m2_schedule_delay/config-kai-local.xml"
+//				"/Users/kainagel/runs-svn/berlin-bvg09/presentation_20100408/m2_schedule_delay/config-kai-local.xml"
 						       );
 		} else{
 			config = ConfigUtils.loadConfig( args[0] );
@@ -128,7 +127,7 @@ class KNTransitControler {
 		// ---
 		
 		final Controler controler = new Controler(scenario) ;
-		controler.getConfig().controler().setOverwriteFileSetting( OverwriteFileSetting.overwriteExistingFiles ) ;
+		controler.getConfig().controller().setOverwriteFileSetting( OverwriteFileSetting.overwriteExistingFiles ) ;
 
 		//		Logger.getLogger("main").warn("warning: using randomized pt router!!!!") ;
 		//		tc.addOverridingModule(new RandomizedTransitRouterModule());
@@ -152,9 +151,9 @@ class KNTransitControler {
 //		controler.addOverridingModule(new OTFVisFileWriterModule());
 		//		tc.setCreateGraphs(false);
 		
-		ActivityParams params = new ActivityParams("pt interaction") ;
+		ScoringConfigGroup.ActivityParams params = new ScoringConfigGroup.ActivityParams("pt interaction") ;
 		params.setScoringThisActivityAtAll(false);
-		controler.getConfig().planCalcScore().addActivityParams(params);
+		controler.getConfig().scoring().addActivityParams(params);
 
 		// ---
 		

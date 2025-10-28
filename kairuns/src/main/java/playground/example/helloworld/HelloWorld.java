@@ -37,8 +37,8 @@ public class HelloWorld {
 		// This creates a default matsim config:
 		Config config = ConfigUtils.createConfig();
 		
-		config.controler().setLastIteration(1);
-		config.controler().setOverwriteFileSetting( OverwriteFileSetting.deleteDirectoryIfExists );
+		config.controller().setLastIteration(1);
+		config.controller().setOverwriteFileSetting( OverwriteFileSetting.deleteDirectoryIfExists );
 
 		// This creates a default matsim scenario (which is empty):
 		Scenario scenario = ScenarioUtils.createScenario(config) ;

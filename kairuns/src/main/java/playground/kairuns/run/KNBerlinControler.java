@@ -1,7 +1,9 @@
 package playground.kairuns.run;
 
 import java.util.Set;
-import org.apache.log4j.Logger;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
@@ -14,11 +16,10 @@ import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.consistency.VspConfigConsistencyCheckerImpl;
-import org.matsim.core.config.groups.ControlerConfigGroup.MobsimType;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.TypicalDurationScoreComputation;
+import org.matsim.core.config.groups.ControllerConfigGroup;
 import org.matsim.core.config.groups.PlansConfigGroup.ActivityDurationInterpretation;
 import org.matsim.core.config.groups.QSimConfigGroup.TrafficDynamics;
+import org.matsim.core.config.groups.ScoringConfigGroup;
 import org.matsim.core.config.groups.VspExperimentalConfigGroup.VspDefaultsCheckingLevel;
 import org.matsim.core.controler.*;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
@@ -26,8 +27,10 @@ import org.matsim.core.router.TripStructureUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.collections.CollectionUtils;
 
+import static org.matsim.core.config.groups.ScoringConfigGroup.*;
+
 public final class KNBerlinControler {
-	private static final Logger log = Logger.getLogger(KNBerlinControler.class);
+	private static final Logger log = LogManager.getLogger(KNBerlinControler.class );
 
 	public static double capFactorForEWS = Double.NaN ;
 	
@@ -180,7 +183,7 @@ public final class KNBerlinControler {
 		config.plans().setRemovingUnneccessaryPlanAttributes(true) ;
 		config.plans().setActivityDurationInterpretation(ActivityDurationInterpretation.tryEndTimeThenDuration );
 		if ( equil ) {
-			config.planCalcScore().setWriteExperiencedPlans(true);
+			config.scoring().setWriteExperiencedPlans(true);
 		}
 
 		if ( !equil ) {
@@ -190,35 +193,35 @@ public final class KNBerlinControler {
 			config.counts().setWriteCountsInterval(100);
 		}
 
-		config.controler().setOutputDirectory( System.getProperty("user.home") + "/kairuns/a100/output" );
-		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
+		config.controller().setOutputDirectory( System.getProperty("user.home") + "/kairuns/a100/output" );
+		config.controller().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
 		// controler, global, and related:
 
 		final int lastIteration = 100 ;
-		config.controler().setFirstIteration(0); // with something like "9" we don't get output events! 
-		config.controler().setLastIteration(lastIteration); // with something like "9" we don't get output events! 
-		config.controler().setWriteSnapshotsInterval(lastIteration);
-		config.controler().setWritePlansInterval(lastIteration);
-		config.controler().setWriteEventsInterval(lastIteration);
+		config.controller().setFirstIteration(0); // with something like "9" we don't get output events! 
+		config.controller().setLastIteration(lastIteration); // with something like "9" we don't get output events! 
+		config.controller().setWriteSnapshotsInterval(lastIteration);
+		config.controller().setWritePlansInterval(lastIteration);
+		config.controller().setWriteEventsInterval(lastIteration);
 
-		config.controler().setWritePlansUntilIteration(-1); 
-		config.controler().setWriteEventsUntilIteration(1); 
+		config.controller().setWritePlansUntilIteration(-1); 
+		config.controller().setWriteEventsUntilIteration(1); 
 
 		config.vspExperimental().setWritingOutputEvents(true); // is actually the default
 
 		config.global().setCoordinateSystem("GK4");
 		config.global().setRandomSeed(4711);
 
-		config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
-		config.planCalcScore().setFractionOfIterationsToStartScoreMSA(0.8);
+		config.replanning().setFractionOfIterationsToDisableInnovation(0.8);
+		config.scoring().setFractionOfIterationsToStartScoreMSA(0.8);
 
 		// activity parameters:
 
 		if ( !equil ) {
 			BerlinUtils.createActivityParameters(config);
 		}
-		for ( ActivityParams params : config.planCalcScore().getActivityParams() ) {
+		for ( ActivityParams params : config.scoring().getActivityParams() ) {
 			params.setTypicalDurationScoreComputation( TypicalDurationScoreComputation.relative );
 		}
 
@@ -226,13 +229,13 @@ public final class KNBerlinControler {
 
 		config.global().setNumberOfThreads(6);
 		config.qsim().setNumberOfThreads(5);
-		config.parallelEventHandling().setNumberOfThreads(1);
+		config.eventsManager().setNumberOfThreads(1);
 
 		// qsim:
 
 		config.qsim().setEndTime(36*3600);
 
-		config.controler().setMobsim( MobsimType.qsim.toString() );
+		config.controller().setMobsim( ControllerConfigGroup.MobsimType.qsim.toString() );
 		config.qsim().setFlowCapFactor( sampleFactor );
 		if ( equil ) {
 			config.qsim().setStorageCapFactor( Math.pow( sampleFactor, 0.75 ) ); // <== this would be the correct version.

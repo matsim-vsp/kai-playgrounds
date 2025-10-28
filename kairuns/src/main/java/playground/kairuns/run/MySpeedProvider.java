@@ -26,7 +26,8 @@ import java.util.Map.Entry;
 
 import javax.inject.Inject;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.events.Event;
@@ -51,7 +52,7 @@ import org.matsim.core.router.util.TravelTime;
  *
  */
 final class MySpeedProvider implements BeforeMobsimListener,AfterMobsimListener {
-	private final static Logger log = Logger.getLogger( MySpeedProvider.class );
+	private final static Logger log = LogManager.getLogger( MySpeedProvider.class );
 
 	final class LinkInfo {
 		double[] cnt = new double[36] ;
